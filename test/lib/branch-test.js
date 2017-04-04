@@ -36,6 +36,11 @@ module.exports = function(options) {
 					fs.access(path.join(repoPath, 'src'), function(err) {
 						assert.ifError(err);
 					});
+				},
+				'git status': function() {
+                    smartSpawn('git', ['status'], function(err, stdout) {
+
+                    });
 				}
 			}
 		}
