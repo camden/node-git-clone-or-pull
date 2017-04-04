@@ -82,8 +82,11 @@ module.exports = function(options) {
             });
         });
         context('clone a repo and specify the branch', function() {
+            var githubUrl = 'git://github.com/strugee/strugee.github.com.git';
             before(function(done) {
-                cloneOrPull('git://github.com/strugee/strugee.github.com.git', assign({}, options, {branch: 'src', path: repoPath}), done);
+                rimraf(repoPath, function() {
+                    cloneOrPull(githubUrl, assign({}, options, {branch: 'src', path: repoPath}), done);
+                });
             });
 
             after(function(done) {
@@ -103,13 +106,48 @@ module.exports = function(options) {
                 });
             });
         });
-        context('clone or pull a nonexistant repository', function() {
+        context('clone a repo and specify the depth', function() {
+            var depth = 4;
+
+            if (opts.implementation === "subprocess") {
+            before(function(done) {
+                cloneOrPull('git://github.com/strugee/node-git-clone-or-pull.git', assign({}, options, {path: repoPath, depth: depth}), done);
+            });
+
+            after(function(done) {
+                rimraf(repoPath, done);
+            });
+
+            it('the directory exists', function(done) {
+                fs.access(repoPath, function(err) {
+                    assert.ifError(err);
+                    done();
+                });
+            });
+            it('should have the correct number of commits', function(done) {
+                smartSpawn('git', ['rev-list', '--all', '--count'], repoPath, function(err, stdout) {
+                    var numberOfCommits = parseInt(/(\d+)/.exec(stdout)[0]);
+                    assert.equal(numberOfCommits, depth);
+                    done();
+                });
+            });
+            } else {
+                it('should fail if using Nodegit', function(done) {
+                    assert.throws(function() {
+                        cloneOrPull('git://github.com/strugee/node-git-clone-or-pull.git', assign({}, options, {path: repoPath, depth: depth}), function() {
+                            done();
+                        });
+                    });
+                });
+            }
+        });
+        context('clone or pull a nonexistent repository', function() {
             after(function(done) {
                 rimraf(failRepoPath, done);
             });
 
             it('should fail', function(done) {
-                cloneOrPull('git://nonexistant.com/repo.git', failOpts, function(err) {
+                cloneOrPull('git://github.com/nonexistent.git', failOpts, function(err) {
                     assert.isDefined(err);
                     done();
                 });

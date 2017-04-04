@@ -66,7 +66,14 @@ function withGitSubprocess(url, opts, callback) {
 
 		if (err) {
 			// Not yet cloned
-			spawnWithSanityChecks('git', ['clone', '--quiet', '--branch', opts.branch, url, opts.path], targetDir, function(err, stdout) {
+            var optsArray = ['clone', '--quiet', '--branch', opts.branch];
+
+            if (opts.depth !== undefined) {
+                optsArray = optsArray.concat(['--depth', opts.depth]);
+            }
+
+            optsArray = optsArray.concat([url, opts.path]);
+			spawnWithSanityChecks('git', optsArray, targetDir, function(err, stdout) {
 				// Pass undefined, not null
 				if (!err) err = undefined;
 
@@ -111,7 +118,10 @@ function gitCloneOrPull(url, opts, callback) {
 	// If a specific implementation has been requested, abort if it's unavailable
 	// Otherwise, choose a sensible default.
 	if (opts.implementation) {
-		if (opts.implementation === 'nodegit' && !NodeGit) return callback(new Error('NodeGit could not be loaded, so implementation "nodegit" is unavailable'));
+        if (opts.implementation === 'nodegit') {
+            if (!NodeGit) return callback(new Error('NodeGit could not be loaded, so implementation "nodegit" is unavailable'));
+            if (opts.depth !== undefined) return callback(new Error('Option "depth" is unsupported by "nodegit."'));
+        } 
 		if (opts.implementation === 'subprocess' && !gitBinary) return callback(new Error('Running `git --version` failed, so implementation "subprocess" is unavailable'));
 	} else {
 		if (NodeGit) {
