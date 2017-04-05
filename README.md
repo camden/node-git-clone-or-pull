@@ -6,6 +6,8 @@
 
 Ensure a git repo exists on disk and that it's up-to-date
 
+Note: This is a fork of https://github.com/strugee/node-git-clone-or-pull
+
 ## Installation
 
     npm install git-clone-or-pull
@@ -42,6 +44,8 @@ The `cloneOrPull()` function takes three arguments. In order:
 `implementation` (`String`) - the implementation to use; defaults to `nodegit` in most cases (see "Implementations" below)
 
 `branch` (`String`) - the branch to use; defaults to `master` (even if the default upstream branch is something else)
+
+`depth` (`Number`) - Create a shallow clone with a history truncated to the specified number of commits. See [man git-clone](https://git-scm.com/docs/git-clone#git-clone---depthltdepthgt).
 
 ## Implementations
 
